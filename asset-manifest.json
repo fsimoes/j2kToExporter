@@ -1,0 +1,25 @@
+{
+  "files": {
+    "main.css": "/j2kToExporter/static/css/main.12b15096.chunk.css",
+    "main.js": "/j2kToExporter/static/js/main.774631c2.chunk.js",
+    "main.js.map": "/j2kToExporter/static/js/main.774631c2.chunk.js.map",
+    "runtime-main.js": "/j2kToExporter/static/js/runtime-main.a40b889a.js",
+    "runtime-main.js.map": "/j2kToExporter/static/js/runtime-main.a40b889a.js.map",
+    "static/css/2.583c968b.chunk.css": "/j2kToExporter/static/css/2.583c968b.chunk.css",
+    "static/js/2.e6ca689c.chunk.js": "/j2kToExporter/static/js/2.e6ca689c.chunk.js",
+    "static/js/2.e6ca689c.chunk.js.map": "/j2kToExporter/static/js/2.e6ca689c.chunk.js.map",
+    "static/js/3.f44d869b.chunk.js": "/j2kToExporter/static/js/3.f44d869b.chunk.js",
+    "static/js/3.f44d869b.chunk.js.map": "/j2kToExporter/static/js/3.f44d869b.chunk.js.map",
+    "index.html": "/j2kToExporter/index.html",
+    "static/css/2.583c968b.chunk.css.map": "/j2kToExporter/static/css/2.583c968b.chunk.css.map",
+    "static/css/main.12b15096.chunk.css.map": "/j2kToExporter/static/css/main.12b15096.chunk.css.map",
+    "static/js/2.e6ca689c.chunk.js.LICENSE.txt": "/j2kToExporter/static/js/2.e6ca689c.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.a40b889a.js",
+    "static/css/2.583c968b.chunk.css",
+    "static/js/2.e6ca689c.chunk.js",
+    "static/css/main.12b15096.chunk.css",
+    "static/js/main.774631c2.chunk.js"
+  ]
+}
