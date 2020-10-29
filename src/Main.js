@@ -2,11 +2,11 @@ import React, { Component } from "react";
 import { Input, Button, Layout, Typography, Row, Col, Skeleton, Alert } from "antd";
 import "./Main.css";
 
-
 const { Paragraph } = Typography;
 
 const { Header, Content, Footer } = Layout;
 const { TextArea } = Input;
+// eslint-disable-next-line
 const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g
 
 class Main extends Component {
