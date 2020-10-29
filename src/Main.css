@@ -1,0 +1,17 @@
+
+.site-layout-content {
+  min-height: 280px;
+  padding: 24px;
+  background: #fff;
+  height: 100%;
+}
+
+.title{
+  text-align: center;
+  color: white;
+  font-weight: bold;
+}
+
+.layout{
+  height: 100%;
+}
