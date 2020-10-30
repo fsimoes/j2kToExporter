@@ -7,7 +7,7 @@ const { Paragraph } = Typography;
 const { Header, Content, Footer } = Layout;
 const { TextArea } = Input;
 // eslint-disable-next-line
-const URL_REGEX = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)/g
+const URL_REGEX = /(ftp|http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/
 
 class Main extends Component {
   constructor(props) {
@@ -21,6 +21,13 @@ class Main extends Component {
       success: 0,
     }
 
+  }
+
+
+  getChapterFromName = (rawChapterName) => {
+    let chapterName = rawChapterName.replace('.html', '');
+    chapterName = chapterName.split('-').splice(-1)[0].split('_').splice(-1)[0];
+    return chapterName;
   }
 
   onConvert = () => {
@@ -40,24 +47,36 @@ class Main extends Component {
       const { mangas } = jsonInput;
       const errorOnImport = [];
       let success = 0;
-      mangas.forEach(entry => {
-        const seriesURL = entry.manga[0]
-        if (!entry.chapters || !seriesURL.match(URL_REGEX)) {
+      for (const key in mangas) {
+        const entry = mangas[key]
+        let seriesURL = entry.manga[0];
+
+        if (!entry.chapters) {
           errorOnImport.push(entry.manga[1])
         } else {
-          const chapterList = entry.chapters.map(c => c.u).sort();
+          let chapterList = entry.chapters.map(c => c.u).sort();
           let chapterURL = chapterList[0].split('?')[0];
           chapterURL = chapterURL[chapterURL.length - 1] === '/' ? chapterURL.slice(0, -1) : chapterURL
-          const lastRead = chapterURL.split('/').splice(-1)[0];
-          success++
-          result.Reading.push({
-            seriesURL,
-            chapterURL,
-            lastRead,
-        });
-        }
 
-      });
+          const splitChapterURL = chapterURL.split('/')
+          seriesURL = URL_REGEX.test(seriesURL) ? seriesURL : splitChapterURL.slice(0, -1).join('/')
+
+          if (URL_REGEX.test(seriesURL) === false){
+            errorOnImport.push(entry.manga[1])
+          }
+          else {
+            const chapterName = splitChapterURL.splice(-1)[0];
+            const chapterNumber = this.getChapterFromName(chapterName);
+            const lastRead = `c${chapterNumber}`;
+            success++
+            result.Reading.push({
+              seriesURL,
+              chapterURL,
+              lastRead,
+            });
+          }
+        }
+      };
 
       this.setState({
         result: JSON.stringify(result, null, 4),
@@ -91,7 +110,6 @@ class Main extends Component {
 
   render() {
     const { input, result, error, errorOnImport, success } = this.state;
-    console.log(errorOnImport);
     return (
       <Layout className="layout">
         <Header>
@@ -117,7 +135,7 @@ class Main extends Component {
                     {result.length > 1000 ? `Click To Copy the result (${success})` : result}
                     
                   </Paragraph>
-                  {errorOnImport &&
+                  {errorOnImport && errorOnImport.length > 0 &&
                     <Paragraph
                       copyable={{
                         text: errorOnImport.join('\n')
