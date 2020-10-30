@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Input, Button, Layout, Typography, Row, Col, Skeleton, Alert } from "antd";
 import "./Main.css";
+import { SourceMap } from './constants';
 
 const { Paragraph } = Typography;
 
@@ -23,14 +24,113 @@ class Main extends Component {
 
   }
 
-
   getChapterFromName = (rawChapterName) => {
     let chapterName = rawChapterName.replace('.html', '');
     chapterName = chapterName.split('-').splice(-1)[0].split('_').splice(-1)[0];
     return chapterName;
   }
 
-  onConvert = () => {
+  onKenmeiConvert = (jsonInput) => {
+    const result = {
+      Reading: [],
+      "On-Hold": [],
+    }
+
+    const { mangas } = jsonInput;
+    const errorOnImport = [];
+    let success = 0;
+    for (const key in mangas) {
+      const entry = mangas[key]
+      let seriesURL = entry.manga[0];
+
+      if (!entry.chapters) {
+        errorOnImport.push(entry.manga[1])
+      } else {
+        let chapterList = entry.chapters.map(c => c.u).sort();
+        let chapterURL = chapterList[0].split('?')[0];
+        chapterURL = chapterURL[chapterURL.length - 1] === '/' ? chapterURL.slice(0, -1) : chapterURL
+
+        const splitChapterURL = chapterURL.split('/')
+        seriesURL = URL_REGEX.test(seriesURL) ? seriesURL : splitChapterURL.slice(0, -1).join('/')
+
+        if (URL_REGEX.test(seriesURL) === false) {
+          errorOnImport.push(entry.manga[1])
+        }
+        else {
+          const chapterName = splitChapterURL.splice(-1)[0];
+          const chapterNumber = this.getChapterFromName(chapterName);
+          const lastRead = `c${chapterNumber}`;
+          success++
+          result.Reading.push({
+            seriesURL,
+            chapterURL,
+            lastRead,
+          });
+        }
+      }
+    };
+    return { errorOnImport, success, result }
+  }
+
+  onAllMangaConvert = (jsonInput) => {
+    const result = {
+      mangas: [
+        
+      ],
+      bookmarks: []
+    }
+
+    const { mangas } = jsonInput;
+    const errorOnImport = [];
+    let success = 0;
+
+    for (const key in mangas) {
+      const entry = mangas[key]
+      let u = entry.manga[0];
+      let n = entry.manga[1];
+
+      if (!entry.chapters) {
+        errorOnImport.push(n)
+      } else {
+        let chapterList = entry.chapters.map(c => c.u).sort();
+        let l = chapterList[0].split('?')[0];
+        l = l[l.length - 1] === '/' ? l.slice(0, -1) : l
+        success++
+
+        let mirrorList = l.split('/').filter(a => a.includes('.'))[0];
+
+        if (mirrorList) {
+          mirrorList = mirrorList.split('.');
+          let m;
+          let hasMap = false;
+          for (const index in mirrorList) {
+            m = SourceMap[mirrorList[index]];
+            if(m){
+              hasMap = true;
+              break;
+            }
+          }
+
+          if (hasMap){
+            result.mangas.push({
+              u,
+              n,
+              l,
+              m,
+            });
+          }
+          else {
+          errorOnImport.push(n)
+          }
+        } else {
+          errorOnImport.push(n)
+        }
+      }
+    };
+    return { result, success, errorOnImport  }
+  }
+
+  onConvert = (e) => {
     const { input } = this.state;
     try {
       const jsonInput = JSON.parse(input);
@@ -39,44 +139,8 @@ class Main extends Component {
         throw Error("Incorrect J2K format");
       }
 
-      const result = {
-        Reading: [],
-        "On-Hold": [],
-      }
-
-      const { mangas } = jsonInput;
-      const errorOnImport = [];
-      let success = 0;
-      for (const key in mangas) {
-        const entry = mangas[key]
-        let seriesURL = entry.manga[0];
-
-        if (!entry.chapters) {
-          errorOnImport.push(entry.manga[1])
-        } else {
-          let chapterList = entry.chapters.map(c => c.u).sort();
-          let chapterURL = chapterList[0].split('?')[0];
-          chapterURL = chapterURL[chapterURL.length - 1] === '/' ? chapterURL.slice(0, -1) : chapterURL
-
-          const splitChapterURL = chapterURL.split('/')
-          seriesURL = URL_REGEX.test(seriesURL) ? seriesURL : splitChapterURL.slice(0, -1).join('/')
-
-          if (URL_REGEX.test(seriesURL) === false){
-            errorOnImport.push(entry.manga[1])
-          }
-          else {
-            const chapterName = splitChapterURL.splice(-1)[0];
-            const chapterNumber = this.getChapterFromName(chapterName);
-            const lastRead = `c${chapterNumber}`;
-            success++
-            result.Reading.push({
-              seriesURL,
-              chapterURL,
-              lastRead,
-            });
-          }
-        }
-      };
+      const convertFunction = e.target.innerText.toLowerCase().includes('kenmei') ? this.onKenmeiConvert : this.onAllMangaConvert;
+      const { errorOnImport, success, result } = convertFunction(jsonInput);
 
       this.setState({
         result: JSON.stringify(result, null, 4),
@@ -124,7 +188,10 @@ class Main extends Component {
                 <TextArea value={input} onChange={this.onChangeData} style={{ height: "100%" }} />
               </Col>
               <Col style={{ textAlign: 'center' }} span={8}>
-                <Button disabled={input === ''} type="primary" onClick={this.onConvert}>Convert</Button>
+                <Button disabled={input === ''} type="primary" onClick={this.onConvert}>Convert to Kenmei</Button>
+                <br />
+                <br />
+                <Button disabled={input === ''} type="primary" onClick={this.onConvert}>Convert to All Mangas</Button>
               </Col>
               <Col span={8}>
                 <h3>Results</h3>
